@@ -11,7 +11,7 @@ from skimage.io import imread
 import matplotlib.pyplot as plt
 from skimage import filters,measure
 from PIL import Image
-
+import pandas as pd
 
 filename="ALS_1.5uM_APT_washes.tif"
 directory="/Users/Mathew/Desktop/Axioscan/"
@@ -177,33 +177,76 @@ for i in range(len(coinc_antibody_list)):
 
 
 
-
 # Measure parameters of labelled regions. 
 
-table=measure.regionprops_table(label_apt,properties=('area','centroid','orientation','major_axis_length','minor_axis_length'))
+all_aptamers_measure=measure.regionprops_table(label_apt,intensity_image=imageapt,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
+
+
+aptamer_all=pd.DataFrame.from_dict(all_aptamers_measure) 
+aptamer_all.to_csv(directory + '/' + 'all_aptamer_metrics.csv', sep = '\t')
+
+
+
+all_antibody_measure=measure.regionprops_table(label_ab,intensity_image=imageab,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
+
+
+antibody_all=pd.DataFrame.from_dict(all_antibody_measure) 
+antibody_all.to_csv(directory + '/' + 'all_antibody_metrics.csv', sep = '\t')
+
+
+# Now look at measuring just coincident regions:
+    
+label_ab_coinc=measure.label(antibody_coincident)
+label_apt_coinc=measure.label(aptamer_coincident)
+
+
+coinc_aptamers_measure=measure.regionprops_table(label_apt_coinc,intensity_image=imageapt,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
+
+
+aptamer_coinc=pd.DataFrame.from_dict(coinc_aptamers_measure) 
+aptamer_coinc.to_csv(directory + '/' + 'coinc_aptamer_metrics.csv', sep = '\t')
+
+
+
+coinc_antibody_measure=measure.regionprops_table(label_ab_coinc,intensity_image=imageab,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
+
+
+antibody_coinc=pd.DataFrame.from_dict(coinc_antibody_measure) 
+antibody_coinc.to_csv(directory + '/' + 'coinc_antibody_metrics.csv', sep = '\t')
+
+
+# Would now like to get mean intensities of the clusters
+
+
+# First for all clusters
+
+coinc_antibody_measure=measure.regionprops_table(label_ab_coinc,intensity_image=imageab,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
 
 
 # Get the area and length data. 
-areas=table['area']
-lengths=table['major_axis_length']
+# areas=table['area']
+# lengths=table['major_axis_length']
 
-number=len(areas)  # Count the number of features detected. 
 
-print(number)
 
-# Plot some histograms. 
 
-plt.hist(areas, bins = 50,range=[0,100], rwidth=0.9,color='#607c8e')
-plt.xlabel('Area (pixels)')
-plt.ylabel('Number of Features')
-plt.title('Area of features')
-plt.show()
+# number=len(areas)  # Count the number of features detected. 
 
-plt.hist(lengths, bins = 50,range=[0,200], rwidth=0.9,color='#607c8e')
-plt.xlabel('Length (pixels)')
-plt.ylabel('Number of Features')
-plt.title('Length')
-plt.show()
+# print(number)
+
+# # Plot some histograms. 
+
+# plt.hist(areas, bins = 50,range=[0,100], rwidth=0.9,color='#607c8e')
+# plt.xlabel('Area (pixels)')
+# plt.ylabel('Number of Features')
+# plt.title('Area of features')
+# plt.show()
+
+# plt.hist(lengths, bins = 50,range=[0,200], rwidth=0.9,color='#607c8e')
+# plt.xlabel('Length (pixels)')
+# plt.ylabel('Number of Features')
+# plt.title('Length')
+# plt.show()
 
 
 
