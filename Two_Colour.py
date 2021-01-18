@@ -1,252 +1,179 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 18 08:53:40 2020
+Created on Sat Jan 16 13:00:15 2021
 
 @author: Mathew
 """
-# These are the packages we are using. 
+
 import numpy as np
 from skimage.io import imread
 import matplotlib.pyplot as plt
 from skimage import filters,measure
 from PIL import Image
 import pandas as pd
+from scipy.spatial import distance
+import tifffile
+import czifile
 
-filename="ALS_1.5uM_APT_washes.tif"
-directory="/Users/Mathew/Desktop/Axioscan/"
+# Function to load images:
 
-image=imread(directory+filename)
-
-
-# This is to extract the frames that contain the antibody, aptamer and nucleus
-imagenuc=image[:,:,0]
-imageab=image[:,:,1]
-imageapt=image[:,:,2]
-
-# imagenuc=image[500:1000,500:1000,0]
-# imageab=image[500:1000,500:1000,1]
-# imageapt=image[500:1000,500:1000,2]
-
-
-
-# Determine a threshold using the Otsu method - Note, if I was comparing cases etc., I'd keep the threhsold constant, and not use Otsu for all of them. 
-threshold_ab=filters.threshold_otsu(imageab)    
-filteredab=imageab>threshold_ab
-
-threshold_apt=filters.threshold_otsu(imageapt)    
-filteredapt=imageapt>threshold_apt   
-
-# Show the binary images. 
-
-# plt.imshow(filteredab,cmap="Blues")
-# plt.show()
-
-# plt.imshow(filteredapt,cmap="Reds")
-# plt.show()
-
-# Coincidence- this is to just look at coincidence on a pixel-by-pixel basis.
-
-Coinc_image_pixels=filteredapt & filteredab
-
-# plt.imshow(Coinc_image_pixels)
-# plt.show()
-
-# Now to get some statistics:
-
-aptamer_coinc_pixels=Coinc_image_pixels.sum()/filteredapt.sum()
-
-print("The fraction of aptamer pixels coincident is %.2f" %aptamer_coinc_pixels)
-
-antibody_coinc_pixels=Coinc_image_pixels.sum()/filteredab.sum()
-
-print("The fraction of antibody pixels coincident is %.2f" %antibody_coinc_pixels)
-
-
-
-
-
-# Now find the different features in the thresholded image. The measure.label function selects the different features and 
-# labels them.
-label_ab=measure.label(filteredab)
-label_apt=measure.label(filteredapt)
-
-
-# Need to find which labels are also coincident- i.e. if aptamer, also antibody?
-
-# This multiplies the coincident binary image with the labelled image
-coincident_label_apt=label_apt*Coinc_image_pixels
-
-# This detects/counts the number of unqiue numbers in the image- i.e. labels
-coinc_aptamer_list, coinc_apt_pixels = np.unique(coincident_label_apt, return_counts=True)
-
-# Repeat for AB
-coincident_label_ab=label_ab*Coinc_image_pixels
-coinc_antibody_list, coinc_antibody_pixels = np.unique(coincident_label_ab, return_counts=True)
-
-# Now get some statistics
-total_apt_clusters=label_apt.max()
-total_ab_clusters=label_ab.max()
-
-total_apt_coinc_clusters=len(coinc_aptamer_list)
-total_ab_coinc_clusters=len(coinc_antibody_list)
-
-fraction_apt_clust_coinc=total_apt_coinc_clusters/total_apt_clusters
-fraction_ab_clust_coinc=total_ab_coinc_clusters/total_ab_clusters
-
-print("The fraction of aptamer clusters coincident is %.2f" %fraction_apt_clust_coinc)
-
-print("The fraction of antibody clusters coincident is %.2f" %fraction_ab_clust_coinc)
-
-# Now need to generate coincident and non-coincident images
-
-coinc_aptamer_list[0]=1000000   # First value is zero- don't want to count these. 
-
-aptamer_coincident=np.isin(label_apt,coinc_aptamer_list)
-# plt.imshow(aptamer_coincident,cmap="Reds")
-# plt.show()
-coinc_aptamer_list[0]=0
-
-aptamer_noncoincident=~np.isin(label_apt,coinc_aptamer_list)
-# plt.imshow(aptamer_noncoincident,cmap="Reds")
-# plt.show()
-
-aptamer_coincident_tosave=aptamer_coincident*imageapt
-im = Image.fromarray(aptamer_coincident_tosave)
-im.save(directory+'aptamer_coinc.tif')
-
-aptamer_noncoincident_tosave=aptamer_noncoincident*imageapt
-im = Image.fromarray(aptamer_noncoincident_tosave)
-im.save(directory+'aptamer_noncoinc.tif')
-
-
-# Now for the antibody channels:
+def load_image(toload):
     
-coinc_antibody_list[0]=1000000   # First value is zero- don't want to count these. 
-
-antibody_coincident=np.isin(label_ab,coinc_antibody_list)
-# plt.imshow(antibody_coincident,cmap="Reds")
-# plt.show()
-coinc_antibody_list[0]=0
-
-antibody_noncoincident=~np.isin(label_ab,coinc_antibody_list)
-# plt.imshow(antibody_noncoincident,cmap="Reds")
-# plt.show()
-
-antibody_coincident_tosave=antibody_coincident*imageab
-im = Image.fromarray(antibody_coincident_tosave)
-im.save(directory+'antibody_coinc.tif')
-
-antibody_noncoincident_tosave=antibody_noncoincident*imageab
-im = Image.fromarray(antibody_noncoincident_tosave)
-im.save(directory+'antibody_noncoinc.tif')
-
-
-
-# Determine percentage overlap in each cluster- i.e. proportion of aptamer coincident with AB and viceversa.
-
-
-label_ab=measure.label(filteredab)
-label_apt=measure.label(filteredapt)
-
-
-# Need to find which labels are also coincident- i.e. if aptamer, also antibody?
-
-# This detects/counts the number of unqiue numbers in the image- i.e. labels
-aptamer_list, apt_pixels = np.unique(label_apt, return_counts=True)
-
-
-apt_fract_overlap=[]
-for i in range(len(coinc_aptamer_list)):
-    overlap_pixels=coinc_apt_pixels[i]
-    num=coinc_aptamer_list[i]
-    total_pixels=apt_pixels[num]
-    apt_fract=1.0*overlap_pixels/total_pixels
-    apt_fract_overlap.append(apt_fract)
-
-antibody_list, antibody_pixels = np.unique(label_ab, return_counts=True)
-
-
-ab_fract_overlap=[]
-for i in range(len(coinc_antibody_list)):
-    overlap_pixels=coinc_antibody_pixels[i]
-    num=coinc_antibody_list[i]
-    total_pixels=antibody_pixels[num]
-    ab_fract=1.0*overlap_pixels/total_pixels
-    ab_fract_overlap.append(ab_fract)
-
-
-
-# Measure parameters of labelled regions. 
-
-all_aptamers_measure=measure.regionprops_table(label_apt,intensity_image=imageapt,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
-
-
-aptamer_all=pd.DataFrame.from_dict(all_aptamers_measure) 
-aptamer_all.to_csv(directory + '/' + 'all_aptamer_metrics.csv', sep = '\t')
-
-
-
-all_antibody_measure=measure.regionprops_table(label_ab,intensity_image=imageab,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
-
-
-antibody_all=pd.DataFrame.from_dict(all_antibody_measure) 
-antibody_all.to_csv(directory + '/' + 'all_antibody_metrics.csv', sep = '\t')
-
-
-# Now look at measuring just coincident regions:
+    image=imread(toload)
     
-label_ab_coinc=measure.label(antibody_coincident)
-label_apt_coinc=measure.label(aptamer_coincident)
+    return image
+
+# Threshold image using otsu method and output the filtered image along with the threshold value applied:
+    
+def threshold_image_otsu(input_image):
+    threshold_value=filters.threshold_otsu(input_image)    
+    binary_image=input_image>threshold_value
+
+    return threshold_value,binary_image
+
+# Label and count the features in the thresholded image:
+def label_image(input_image):
+    labelled_image=measure.label(input_image)
+    number_of_features=labelled_image.max()
+ 
+    return number_of_features,labelled_image
+    
+# Function to show the particular image:
+def show(input_image):
+    plt.imshow(input_image,cmap="Reds")
+    plt.show()
+
+# Take a labelled image and the original image and measure intensities, sizes etc.
+def analyse_labelled_image(labelled_image,original_image):
+    measure_image=measure.regionprops_table(labelled_image,intensity_image=original_image,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
+    measure_dataframe=pd.DataFrame.from_dict(measure_image)
+    return measure_dataframe
+
+# This is to look at coincidence purely in terms of pixels
+
+def coincidence_analysis_pixels(binary_image1,binary_image2):
+    pixel_overlap_image=binary_image1&binary_image2         
+    pixel_overlap_count=pixel_overlap_image.sum()
+    pixel_fraction=pixel_overlap_image.sum()/binary_image1.sum()
+    
+    return pixel_overlap_image,pixel_overlap_count,pixel_fraction
+
+# Look at coincidence in terms of features. Needs binary image input 
+
+def feature_coincidence(binary_image1,binary_image2):
+    number_of_features,labelled_image1=label_image(binary_image1)          # Labelled image is required for this analysis
+    coincident_image=binary_image1 & binary_image2        # Find pixel overlap between the two images
+    coincident_labels=labelled_image1*coincident_image   # This gives a coincident image with the pixels being equal to label
+    coinc_list, coinc_pixels = np.unique(coincident_labels, return_counts=True)     # This counts number of unique occureences in the image
+    # Now for some statistics
+    total_labels=labelled_image1.max()
+    total_labels_coinc=len(coinc_list)
+    fraction_coinc=total_labels_coinc/total_labels
+    
+    # Now look at the fraction of overlap in each feature
+    # First of all, count the number of unique occurances in original image
+    label_list, label_pixels = np.unique(labelled_image1, return_counts=True)
+    fract_pixels_overlap=[]
+    for i in range(len(coinc_list)):
+        overlap_pixels=coinc_pixels[i]
+        label=coinc_list[i]
+        total_pixels=label_pixels[label]
+        fract=1.0*overlap_pixels/total_pixels
+        fract_pixels_overlap.append(fract)
+    
+    
+    # Generate the images
+    coinc_list[0]=1000000   # First value is zero- don't want to count these. 
+    coincident_features_image=np.isin(labelled_image1,coinc_list)   # Generates binary image only from labels in coinc list
+    coinc_list[0]=0
+    non_coincident_features_image=~np.isin(labelled_image1,coinc_list)  # Generates image only from numbers not in coinc list.
+    
+    return coinc_list,coinc_pixels,fraction_coinc,coincident_features_image,non_coincident_features_image,fract_pixels_overlap
+
+# Function to measure minimum distances between two sets of data
+def minimum_distance(measurements1,measurements2):
+    s1 = measurements1[["centroid-0","centroid-1"]].to_numpy()
+    s2 = measurements2[["centroid-0","centroid-1"]].to_numpy()
+    minimum_lengths=distance.cdist(s1,s2).min(axis=1)
+    return minimum_lengths
 
 
-coinc_aptamers_measure=measure.regionprops_table(label_apt_coinc,intensity_image=imageapt,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
+pathList=[]
 
+pathList.append(r"/Users/Mathew/Desktop/Axioscan/")
 
-aptamer_coinc=pd.DataFrame.from_dict(coinc_aptamers_measure) 
-aptamer_coinc.to_csv(directory + '/' + 'coinc_aptamer_metrics.csv', sep = '\t')
+for i in range(len(pathList)):
+    
+    directory=pathList[i]
+    
+    # Run functions for aptamer
+    filename="apt.tif"
+    apt_image=load_image(directory+filename)
+    apt_threshold,apt_binary=threshold_image_otsu(apt_image)
+    apt_number,apt_labelled=label_image(apt_binary)
+    print("%d feautres were detected in the aptamer image."%apt_number)
+    apt_measurements=analyse_labelled_image(apt_labelled,apt_image)
+    apt_measurements.to_csv(directory + '/' + 'all_aptamer_metrics.csv', sep = '\t')
+    
+    # Run functions for antibody
+    filename="ab.tif"
+    ab_image=load_image(directory+filename)
+    ab_threshold,ab_binary=threshold_image_otsu(ab_image)
+    ab_number,ab_labelled=label_image(ab_binary)
+    print("%d feautres were detected in the antibody image."%ab_number)
+    ab_measurements=analyse_labelled_image(ab_labelled,ab_image)
+    ab_measurements.to_csv(directory + '/' + 'all_ab_metrics.csv', sep = '\t')
+    
+    # Run all functions for nucleus
+    filename="nuc.tif"
+    nuc_image=load_image(directory+filename)
+    nuc_threshold,nuc_binary=threshold_image_otsu(nuc_image)
+    nuc_number,nuc_labelled=label_image(nuc_binary)
+    print("%d nuclei were detected in the image."%nuc_number)
+    nuc_measurements=analyse_labelled_image(nuc_labelled,nuc_image)
+    nuc_measurements.to_csv(directory + '/' + 'all_nuc_metrics.csv', sep = '\t')
+    
+    # Coincidence functions
+    
+    apt_pixel_coincident_image,apt_pixel_overal_count,apt_pixel_fraction=coincidence_analysis_pixels(apt_binary,ab_binary)
+    print("%.2f of aptamer pixels had coincidence with the antibody image."%apt_pixel_fraction)
+    
+    ab_pixel_coincident_image,ab_pixel_overal_count,ab_pixel_fraction=coincidence_analysis_pixels(ab_binary,apt_binary)
+    print("%.2f of antibody pixels had coincidence with the antibody image."%ab_pixel_fraction)
 
+    apt_coinc_list,apt_coinc_pixels,apt_fraction_coinc,apt_coincident_features_image,apt_noncoincident_features_image,apt_fraction_pixels_overlap=feature_coincidence(apt_binary,ab_binary)
+    print("%.2f of aptamer features had coincidence with features in antibody image. Average overlap was %2f."%(apt_fraction_coinc,sum(apt_fraction_pixels_overlap)/len(apt_fraction_pixels_overlap)))
+    
+    aptamer_coincident_tosave=apt_coincident_features_image*apt_image
+    im = Image.fromarray(aptamer_coincident_tosave)
+    im.save(directory+'Aptamer_features_coincident.tif')
+    
+    aptamer_noncoincident_tosave=apt_noncoincident_features_image*apt_image
+    im = Image.fromarray(aptamer_noncoincident_tosave)
+    im.save(directory+'Aptamer_features_noncoincident.tif')
+    
+    
+    ab_coinc_list,ab_coinc_pixels,ab_fraction_coinc,ab_coincident_features_image,ab_noncoincident_features_image,ab_fraction_pixels_overlap=feature_coincidence(ab_binary,apt_binary)
+    print("%.2f of antibody features had coincidence with features in aptamer image. Average overlap was %2f."%(ab_fraction_coinc,sum(ab_fraction_pixels_overlap)/len(ab_fraction_pixels_overlap)))
+    
+    antibody_coincident_tosave=ab_coincident_features_image*ab_image
+    im = Image.fromarray(antibody_coincident_tosave)
+    im.save(directory+'Antibody_features_coincident.tif')
+    
+    antibody_noncoincident_tosave=ab_noncoincident_features_image*ab_image
+    im = Image.fromarray(antibody_noncoincident_tosave)
+    im.save(directory+'Antibody_features_noncoincident.tif')
 
+    
+    aptamer_distance_to_nuc=minimum_distance(apt_measurements,nuc_measurements)
+    antibody_distance_to_nuc=minimum_distance(ab_measurements,nuc_measurements)  
+    nuc_distance_to_nuc=minimum_distance(nuc_measurements,nuc_measurements)
+   
+    
 
-coinc_antibody_measure=measure.regionprops_table(label_ab_coinc,intensity_image=imageab,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
-
-
-antibody_coinc=pd.DataFrame.from_dict(coinc_antibody_measure) 
-antibody_coinc.to_csv(directory + '/' + 'coinc_antibody_metrics.csv', sep = '\t')
-
-
-# Would now like to get mean intensities of the clusters
-
-
-# First for all clusters
-
-coinc_antibody_measure=measure.regionprops_table(label_ab_coinc,intensity_image=imageab,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
-
-
-# Get the area and length data. 
-# areas=table['area']
-# lengths=table['major_axis_length']
-
-
-
-
-# number=len(areas)  # Count the number of features detected. 
-
-# print(number)
-
-# # Plot some histograms. 
-
-# plt.hist(areas, bins = 50,range=[0,100], rwidth=0.9,color='#607c8e')
-# plt.xlabel('Area (pixels)')
-# plt.ylabel('Number of Features')
-# plt.title('Area of features')
-# plt.show()
-
-# plt.hist(lengths, bins = 50,range=[0,200], rwidth=0.9,color='#607c8e')
-# plt.xlabel('Length (pixels)')
-# plt.ylabel('Number of Features')
-# plt.title('Length')
-# plt.show()
-
-
-
+    
+    
+    
+    
+    
