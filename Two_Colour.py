@@ -16,7 +16,7 @@ from scipy.spatial import distance
 import czifile
 
 # Where to save overall results
-root_directory=r"/Users/Mathew/Dropbox (Cambridge University)/Analysis/ECAS_cohort_slidescans/2021_01_14/"  
+root_directory=r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/"  
 
 # Paths to analyse below
 
@@ -24,12 +24,52 @@ root_directory=r"/Users/Mathew/Dropbox (Cambridge University)/Analysis/ECAS_coho
 pathList=[]
 
 
-pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/Analysis/ECAS_cohort_slidescans/2021_01_14/Crops_SOD27_14")
-pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/Analysis/ECAS_cohort_slidescans/2021_01_14/Crops_SOD16_14")
-pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/Analysis/ECAS_cohort_slidescans/2021_01_14/Crops_SOD30_18")
-pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/Analysis/ECAS_cohort_slidescans/2021_01_14/Crops_SOD22_17")
-
-filename="Crop.czi"
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD041_19_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD036_17_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD008_15_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD026_18_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD036_17_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD041_19_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD030_18_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD008_15_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD015_16_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD027_18_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD015_16_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD025_17_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD030_18_2_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD024_18_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD016_16_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD053_16_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD016_14_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD016_14_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD022_17_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD053_16_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD024_18_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD050_19_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD050_19_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD008_15_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD030_18_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD026_18_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD036_17_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD026_18_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD030_18_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD041_19_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD025_17_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD027_18_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD015_16_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD027_18_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD025_17_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD016_16_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD030_18_2_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD016_14_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD022_17_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD053_16_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD022_17_1")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD030_18_2_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD024_18_2")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD016_16_0")
+pathList.append(r"/Users/Mathew/Dropbox (Cambridge University)/OneDrive - University of Edinburgh/2021_01_19/SD050_19_2")
+filename="Image.czi"
 
 pixel_size=325 # Pixel size in nm
 
@@ -67,10 +107,21 @@ def label_image(input_image):
     return number_of_features,labelled_image
     
 # Function to show the particular image:
-def show(input_image):
-    plt.imshow(input_image,cmap="Reds")
-    plt.show()
-
+def show(input_image,color=''):
+    if(color=='Red'):
+        plt.imshow(input_image,cmap="Reds")
+        plt.show()
+    elif(color=='Blue'):
+        plt.imshow(input_image,cmap="Blues")
+        plt.show()
+    elif(color=='Green'):
+        plt.imshow(input_image,cmap="Greens")
+        plt.show()
+    else:
+        plt.imshow(input_image)
+        plt.show() 
+    
+        
 # Take a labelled image and the original image and measure intensities, sizes etc.
 def analyse_labelled_image(labelled_image,original_image):
     measure_image=measure.regionprops_table(labelled_image,intensity_image=original_image,properties=('area','perimeter','centroid','orientation','major_axis_length','minor_axis_length','mean_intensity','max_intensity'))
@@ -347,61 +398,70 @@ for i in range(len(pathList)):
     plt.ylabel('Number of Features')
     plt.title('Area of aptamer feature')
     plt.savefig(directory+'/'+'Aptamer_areas.pdf')
+    plt.show()
     
     plt.hist(apt_lengths, bins = 50,range=[0,100], rwidth=0.9,color='#607c8e')
     plt.xlabel('Length (major axis) (\u03bcm)')
     plt.ylabel('Number of Features')
     plt.title('Length of aptamer features')
     plt.savefig(directory+'/'+'Aptamer_lengths.pdf')
+    plt.show()
     
     plt.hist(apt_perimeter, bins = 50,range=[0,100], rwidth=0.9,color='#607c8e')
     plt.xlabel('Perimeter of feature (\u03bcm)')
     plt.ylabel('Number of Features')
     plt.title('Perimeter of aptamer features')
     plt.savefig(directory+'/'+'Aptamer_perimeters.pdf')
+    plt.show()
     
-    plt.hist(apt_mean_intensities, bins = 50,range=[8000,30000], rwidth=0.9,color='#607c8e')
+    plt.hist(apt_mean_intensities, bins = 50,range=[10000,100000], rwidth=0.9,color='#607c8e')
     plt.xlabel('Mean intensity (AU)')
     plt.ylabel('Number of Features')
     plt.title('Mean intensities')
     plt.savefig(directory+'/'+'Aptamer_intensities_mean.pdf')
+    plt.show()
     
-    plt.hist(apt_max_intensities, bins = 50,range=[8000,30000], rwidth=0.9,color='#607c8e')
+    plt.hist(apt_max_intensities, bins = 50,range=[10000,100000], rwidth=0.9,color='#607c8e')
     plt.xlabel('Maximum intensity (AU)')
     plt.ylabel('Number of Features')
     plt.title('Maximum intensities')
     plt.savefig(directory+'/'+'Aptamer_intensities_max.pdf')
+    plt.show()
     
     plt.hist(ab_areas, bins = 50,range=[0,100], rwidth=0.9,color='#607c8e')
     plt.xlabel('Area of feature (\u03bcm$^2$)')
     plt.ylabel('Number of Features')
     plt.title('Area of antibody feature')
     plt.savefig(directory+'/'+'antibody_areas.pdf')
+    plt.show()
     
     plt.hist(ab_lengths, bins = 50,range=[0,100], rwidth=0.9,color='#607c8e')
     plt.xlabel('Length (major axis) (\u03bcm)')
     plt.ylabel('Number of Features')
     plt.title('Length of antibody features')
     plt.savefig(directory+'/'+'antibody_lengths.pdf')
+    plt.show()
     
     plt.hist(ab_perimeter, bins = 50,range=[0,100], rwidth=0.9,color='#607c8e')
     plt.xlabel('Perimeter of feature (\u03bcm)')
     plt.ylabel('Number of Features')
     plt.title('Perimeter of antibody features')
     plt.savefig(directory+'/'+'antibody_perimeters.pdf')
+    plt.show()
     
     plt.hist(ab_mean_intensities, bins = 50,range=[8000,30000], rwidth=0.9,color='#607c8e')
     plt.xlabel('Mean intensity (AU)')
     plt.ylabel('Number of Features')
     plt.title('Mean intensities')
     plt.savefig(directory+'/'+'antibody_intensities_mean.pdf')
+    plt.show()
     
     plt.hist(ab_max_intensities, bins = 50,range=[8000,30000], rwidth=0.9,color='#607c8e')
     plt.xlabel('Maximum intensity (AU)')
     plt.ylabel('Number of Features')
     plt.title('Maximum intensities')
     plt.savefig(directory+'/'+'antibody_intensities_max.pdf')
-
+    plt.show()
 
 
 
